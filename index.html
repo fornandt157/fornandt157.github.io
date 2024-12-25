@@ -34,18 +34,29 @@
       body {
         text-align: center;
         font-family: 'Press Start 2P', cursive;
+        background-color: #ffe4e1; /* Light pink background */
+      }
+      header h1 {
+        color: #ff69b4; /* Hot pink color */
+        animation: fadeIn 2s ease-in;
       }
       .nes-container {
         display: inline-block;
         margin-top: 20px;
         text-align: left;
+        border: 2px solid #ff69b4; /* Hot pink border */
+        box-shadow: 0 0 10px #ff69b4; /* Glow effect */
+        animation: popIn 0.5s ease-in-out;
       }
       .hrs {
         margin-top: 20px;
+        border-color: #ff69b4;
       }
       #new-note {
         width: 80%;
         margin-bottom: 10px;
+        border: 2px solid #ff69b4;
+        border-radius: 5px;
       }
       .btn-container {
         margin-top: 20px;
@@ -57,14 +68,23 @@
         padding-right: 10px;
         padding-left: 10px;
         display: flex;
-        justify-content: center; /* Căn giữa */
+        justify-content: center;
       }
-      
       #journal-table {
         margin-top: 20px;
-        width: 90%; /* Có thể điều chỉnh chiều rộng của bảng */
-        border-collapse: collapse; /* Để loại bỏ khoảng cách giữa các ô */
-        text-align: center; /* Căn giữa nội dung trong các ô */
+        width: 90%;
+        border-collapse: collapse;
+        text-align: center;
+        background-color: #fff0f5; /* Lavender blush */
+        border: 2px solid #ff69b4;
+        animation: slideIn 1s ease-out;
+      }
+      #journal-table th {
+        background-color: #ff69b4;
+        color: white;
+      }
+      #journal-table td {
+        border: 1px solid #ff69b4;
       }
       /* Loading Spinner */
       #loading {
@@ -74,6 +94,7 @@
       }
       #loading .nes-ball {
         font-size: 2rem;
+        animation: bounce 1s infinite;
       }
       /* Disabled Button */
       .disabled-btn {
@@ -82,6 +103,43 @@
       }
       #journal-table th:first-child, #journal-table td:first-child {
         width: 20%; /* Adjust this value as needed */
+      }
+      /* Animations */
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes popIn {
+        0% {
+          transform: scale(0.9);
+          opacity: 0;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+      @keyframes slideIn {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+      @keyframes bounce {
+        0%, 100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
       }
     </style>
   </head>
@@ -116,120 +174,88 @@
         </div>
       </div>
     </main>
-    <hr class="hrs">
-    <script>
-      // Fetch the notes from the API
-      fetch('https://676b9dffbc36a202bb851c0a.mockapi.io/notes?sortBy=createdAt&limit=10&order=desc')
-        .then(response => response.json())
-        .then(data => {
-          // You can now change the number of notes you want to display (e.g., 10 notes)
-          const notesToDisplay = data.slice(0, 10); // Fetch the latest 10 notes
-          
-          // Insert the fetched notes into the table
-          const tableBody = document.getElementById('journal-table').querySelector('tbody');
-          notesToDisplay.forEach(note => {
-            const row = document.createElement('tr');
-            
-            // Create date cell
-            const dateCell = document.createElement('td');
-            const noteDate = new Date(note.createdAt);
-            dateCell.textContent = noteDate.toLocaleDateString();
-            row.appendChild(dateCell);
-            
-            // Create note cell
-            const noteCell = document.createElement('td');
-            noteCell.textContent = note.note;
-            row.appendChild(noteCell);
-            
-            // Append the row to the table
-            tableBody.appendChild(row);
-          });
-        })
-        .catch(error => {
-          console.error('Error fetching the notes:', error);
+  <footer>
+    <p>Created with ❤ for N and T.</p>
+  </footer>
+  <hr class="hrs">
+  <script>
+    // Fetch notes from API
+    fetch('https://676b9dffbc36a202bb851c0a.mockapi.io/notes?sortBy=createdAt&limit=10&order=desc')
+      .then(response => response.json())
+      .then(data => {
+        const tableBody = document.getElementById('journal-table').querySelector('tbody');
+        data.forEach(note => {
+          const row = document.createElement('tr');
+
+          const dateCell = document.createElement('td');
+          const noteDate = new Date(note.createdAt);
+          dateCell.textContent = noteDate.toLocaleDateString();
+          row.appendChild(dateCell);
+
+          const noteCell = document.createElement('td');
+          noteCell.textContent = note.note;
+          row.appendChild(noteCell);
+
+          tableBody.appendChild(row);
         });
+      })
+      .catch(error => console.error('Error fetching notes:', error));
 
-      // Add new note to the API
-      function addNewNote() {
-        const newNoteText = document.getElementById('new-note').value.trim();
-        
-        if (newNoteText) {
-          const newNote = {
-            note: newNoteText,
-            createdAt: new Date().toISOString()
-          };
-
-          // Show loading spinner
-
-          // Disable the button and change text
-          const addButton = document.getElementById('add-note-btn');
-          addButton.classList.add('disabled-btn');
-          addButton.textContent = 'Sending...';
-
-          fetch('https://676b9dffbc36a202bb851c0a.mockapi.io/notes', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(newNote),
-          })
-          .then(response => response.json())
-          .then(data => {
-            // Hide loading spinner
-            
-            // Clear the input field
-            document.getElementById('new-note').value = '';
-            
-            // Add the new note to the table dynamically
-            const tableBody = document.getElementById('journal-table').querySelector('tbody');
-            const row = document.createElement('tr');
-            
-            // Create date cell
-            const dateCell = document.createElement('td');
-            const noteDate = new Date(data.createdAt);
-            dateCell.textContent = noteDate.toLocaleDateString();
-            row.appendChild(dateCell);
-            
-            // Create note cell
-            const noteCell = document.createElement('td');
-            noteCell.textContent = data.note;
-            row.appendChild(noteCell);
-            
-            // If we already have 10 rows, remove the oldest one
-            if (tableBody.rows.length === 10) {
-              tableBody.deleteRow(9);
-            }
-            
-            // Append the new row to the table
-            tableBody.insertBefore(row, tableBody.rows[0]);
-
-            // Revert button to normal state after adding the note
-            addButton.classList.remove('disabled-btn');
-            addButton.textContent = 'Add Note';
-          })
-          .catch(error => {
-            // Hide loading spinner in case of error
-            console.error('Error adding the note:', error);
-
-            // Revert button to normal state if an error occurs
-            addButton.classList.remove('disabled-btn');
-            addButton.textContent = 'Add Note';
-          });
-        } else {
-          alert("Please enter a note before submitting!");
-        }
+    // Add a new note
+    function addNewNote() {
+      const newNote = document.getElementById('new-note').value.trim();
+      if (!newNote) {
+        alert('Please write something!');
+        return;
       }
 
-      // Add note on button click
-      document.getElementById('add-note-btn').addEventListener('click', addNewNote);
+      const noteData = { note: newNote, createdAt: new Date().toISOString() };
 
-      // Add note on Enter key press
-      document.getElementById('new-note').addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-          event.preventDefault();  // Prevent default behavior (line break)
-          addNewNote();
-        }
-      });
-    </script>
-  </body>
+      const addButton = document.getElementById('add-note-btn');
+      addButton.disabled = true;
+      addButton.textContent = 'Adding...';
+
+      fetch('https://676b9dffbc36a202bb851c0a.mockapi.io/notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(noteData),
+      })
+        .then(response => response.json())
+        .then(note => {
+          const tableBody = document.getElementById('journal-table').querySelector('tbody');
+
+          const row = document.createElement('tr');
+
+          const dateCell = document.createElement('td');
+          const noteDate = new Date(note.createdAt);
+          dateCell.textContent = noteDate.toLocaleDateString();
+          row.appendChild(dateCell);
+
+          const noteCell = document.createElement('td');
+          noteCell.textContent = note.note;
+          row.appendChild(noteCell);
+
+          if (tableBody.rows.length >= 10) tableBody.deleteRow(-1);
+          tableBody.insertBefore(row, tableBody.firstChild);
+
+          document.getElementById('new-note').value = '';
+          addButton.disabled = false;
+          addButton.textContent = 'Add Note';
+        })
+        .catch(error => {
+          console.error('Error adding note:', error);
+          addButton.disabled = false;
+          addButton.textContent = 'Add Note';
+        });
+    }
+
+    document.getElementById('add-note-btn').addEventListener('click', addNewNote);
+    document.getElementById('new-note').addEventListener('keydown', event => {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        addNewNote();
+      }
+    });
+  </script>
+</body>
 </html>
