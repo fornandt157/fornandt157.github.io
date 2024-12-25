@@ -54,15 +54,15 @@
       .nes-table-responsive {
         max-height: 200px;
         overflow-y: auto;
-        padding-right: 50px;
-        padding-left: 50px;
+        padding-right: 10px;
+        padding-left: 10px;
         display: flex;
         justify-content: center; /* Căn giữa */
       }
       
       #journal-table {
         margin-top: 20px;
-        width: 80%; /* Có thể điều chỉnh chiều rộng của bảng */
+        width: 90%; /* Có thể điều chỉnh chiều rộng của bảng */
         border-collapse: collapse; /* Để loại bỏ khoảng cách giữa các ô */
         text-align: center; /* Căn giữa nội dung trong các ô */
       }
@@ -79,6 +79,9 @@
       .disabled-btn {
         background-color: #b5b5b5 !important;
         cursor: not-allowed;
+      }
+      #journal-table th:first-child, #journal-table td:first-child {
+        width: 20%; /* Adjust this value as needed */
       }
     </style>
   </head>
@@ -107,7 +110,7 @@
         </div>
         <div class="nes-container with-title is-centered">
           <div class="btn-container">
-            <textarea id="new-note" class="nes-textarea" placeholder="just text anything..."></textarea>
+            <textarea id="new-note" class="nes-textarea" placeholder="just input anything..."></textarea>
             <button class="nes-btn is-primary" id="add-note-btn">Add Note</button>
           </div>  
         </div>
