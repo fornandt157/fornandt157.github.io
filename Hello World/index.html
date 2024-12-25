@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- nes.css / minify -->
+    <link href="https://unpkg.com/nes.css@2.3.0/css/nes.min.css" rel="stylesheet" />
+    <!-- nes.css / latest -->
+    <link href="https://unpkg.com/nes.css@latest/css/nes.min.css" rel="stylesheet" />
+    <!-- nes.css / core style only -->
+    <link href="https://unpkg.com/nes.css/css/nes-core.min.css" rel="stylesheet" />
+    <!-- font -->
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <!-- favicon -->
+    <!-- Primary Meta Tags -->
+    <title>A little thing</title>
+    <meta name="title" content="A little thing">
+    <meta name="description" content="A little thing">
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://example.com">
+    <meta property="og:title" content="A little thing">
+    <meta property="og:description" content="A little thing">
+    <meta property="og:image" content="https://example.com/assets/logo.svg">
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://example.com">
+    <meta property="twitter:title" content="A little thing">
+    <meta property="twitter:description" content="A little thing">
+    <meta property="twitter:image" content="https://example.com/assets/logo.svg">
+    <!-- CSS for table -->
+    <style>
+      body {
+        text-align: center;
+        font-family: 'Press Start 2P', cursive;
+      }
+      .nes-container {
+        display: inline-block;
+        margin-top: 20px;
+        text-align: left;
+      }
+      .hrs {
+        margin-top: 20px;
+      }
+      #new-note {
+        width: 80%;
+        margin-bottom: 10px;
+      }
+      .btn-container {
+        margin-top: 20px;
+      }
+      /* Table Styling for auto-scroll */
+      .nes-table-responsive {
+        max-height: 200px;
+        overflow-y: auto;
+        padding-right: 50px;
+        padding-left: 50px;
+        display: flex;
+        justify-content: center; /* Căn giữa */
+      }
+      
+      #journal-table {
+        margin-top: 20px;
+        width: 80%; /* Có thể điều chỉnh chiều rộng của bảng */
+        border-collapse: collapse; /* Để loại bỏ khoảng cách giữa các ô */
+        text-align: center; /* Căn giữa nội dung trong các ô */
+      }
+      /* Loading Spinner */
+      #loading {
+        display: none;
+        text-align: center;
+        margin-top: 20px;
+      }
+      #loading .nes-ball {
+        font-size: 2rem;
+      }
+      /* Disabled Button */
+      .disabled-btn {
+        background-color: #b5b5b5 !important;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>- For N and T -</h1>
+    </header>
+    <hr class="hrs">
+    <main>
+      <div class="nes-container with-title is-centered">
+        <p class="title">Why are we here?</p>
+        <p>「idk, but i just wanna make u happy together」</p>
+        <h2>Our Notes</h2>
+        <div class="nes-table-responsive is-centered">
+          <table class="nes-table is-bordered is-centered" id="journal-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Content</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Data will be inserted here via JavaScript -->
+            </tbody>
+          </table>
+        </div>
+        <div class="nes-container with-title is-centered">
+          <div class="btn-container">
+            <textarea id="new-note" class="nes-textarea" placeholder="新しいメモを書いてください..."></textarea>
+            <button class="nes-btn is-primary" id="add-note-btn">Add Note</button>
+          </div>  
+        </div>
+      </div>
+    </main>
+    <hr class="hrs">
+    <script>
+      // Fetch the notes from the API
+      fetch('https://676b9dffbc36a202bb851c0a.mockapi.io/notes?sortBy=createdAt&limit=10&order=desc')
+        .then(response => response.json())
+        .then(data => {
+          // You can now change the number of notes you want to display (e.g., 10 notes)
+          const notesToDisplay = data.slice(0, 10); // Fetch the latest 10 notes
+          
+          // Insert the fetched notes into the table
+          const tableBody = document.getElementById('journal-table').querySelector('tbody');
+          notesToDisplay.forEach(note => {
+            const row = document.createElement('tr');
+            
+            // Create date cell
+            const dateCell = document.createElement('td');
+            const noteDate = new Date(note.createdAt);
+            dateCell.textContent = noteDate.toLocaleDateString();
+            row.appendChild(dateCell);
+            
+            // Create note cell
+            const noteCell = document.createElement('td');
+            noteCell.textContent = note.note;
+            row.appendChild(noteCell);
+            
+            // Append the row to the table
+            tableBody.appendChild(row);
+          });
+        })
+        .catch(error => {
+          console.error('Error fetching the notes:', error);
+        });
+
+      // Add new note to the API
+      function addNewNote() {
+        const newNoteText = document.getElementById('new-note').value.trim();
+        
+        if (newNoteText) {
+          const newNote = {
+            note: newNoteText,
+            createdAt: new Date().toISOString()
+          };
+
+          // Show loading spinner
+
+          // Disable the button and change text
+          const addButton = document.getElementById('add-note-btn');
+          addButton.classList.add('disabled-btn');
+          addButton.textContent = 'Sending...';
+
+          fetch('https://676b9dffbc36a202bb851c0a.mockapi.io/notes', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(newNote),
+          })
+          .then(response => response.json())
+          .then(data => {
+            // Hide loading spinner
+            
+            // Clear the input field
+            document.getElementById('new-note').value = '';
+            
+            // Add the new note to the table dynamically
+            const tableBody = document.getElementById('journal-table').querySelector('tbody');
+            const row = document.createElement('tr');
+            
+            // Create date cell
+            const dateCell = document.createElement('td');
+            const noteDate = new Date(data.createdAt);
+            dateCell.textContent = noteDate.toLocaleDateString();
+            row.appendChild(dateCell);
+            
+            // Create note cell
+            const noteCell = document.createElement('td');
+            noteCell.textContent = data.note;
+            row.appendChild(noteCell);
+            
+            // If we already have 10 rows, remove the oldest one
+            if (tableBody.rows.length === 10) {
+              tableBody.deleteRow(9);
+            }
+            
+            // Append the new row to the table
+            tableBody.insertBefore(row, tableBody.rows[0]);
+
+            // Revert button to normal state after adding the note
+            addButton.classList.remove('disabled-btn');
+            addButton.textContent = 'Add Note';
+          })
+          .catch(error => {
+            // Hide loading spinner in case of error
+            console.error('Error adding the note:', error);
+
+            // Revert button to normal state if an error occurs
+            addButton.classList.remove('disabled-btn');
+            addButton.textContent = 'Add Note';
+          });
+        } else {
+          alert("Please enter a note before submitting!");
+        }
+      }
+
+      // Add note on button click
+      document.getElementById('add-note-btn').addEventListener('click', addNewNote);
+
+      // Add note on Enter key press
+      document.getElementById('new-note').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+          event.preventDefault();  // Prevent default behavior (line break)
+          addNewNote();
+        }
+      });
+    </script>
+  </body>
+</html>
